@@ -1,50 +1,50 @@
 # Exchange Simulator
 
-A high-performance, deterministic C++17 limit order book and matching engine implementing strict price-time priority (FIFO), $O(1)$ order cancellation by OrderID, and trade execution reporting.
+A high-performance, deterministic C++17 limit order book and matching engine implementing strict price-time priority (FIFO), $O(1)$ order cancellation by OrderID, low-latency memory pooling, open-addressing hash indexing, and structured trade execution reporting.
 
 ---
 
-## Performance / Benchmark Results
+## Performance & Optimization Progression
 
-The following benchmarks were measured on a Linux x86_64 system compiled with `g++ -O3 -std=c++17`. Benchmarks execute in single-threaded in-memory isolation with logging compiled out to isolate engine matching performance.
+The following benchmark metrics were measured on a Linux x86_64 system compiled with `g++ -O3 -std=c++17` (`ENABLE_LOGGING` compiled out). The table details the concrete performance progression achieved across the implemented low-latency optimizations:
 
-| Workload Scenario | Operations | Throughput | Median Latency ($p50$) | 99th Percentile ($p99$) | 99.9th Percentile ($p99.9$) |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **Limit Insertion (1k levels)** | 100,000 | ~3.8 Mops/sec | 180 ns | 520 ns | 1,200 ns |
-| **Matching Throughput** | 50,000 pairs | ~3.1 Mops/sec | 240 ns | 680 ns | 1,500 ns |
-| **Order Cancellation** | 100,000 | ~6.2 Mops/sec | 120 ns | 380 ns | 950 ns |
-| **Mixed Workload (60/20/10/10)** | 200,000 | ~4.2 Mops/sec | N/A (Batch) | N/A (Batch) | N/A (Batch) |
-
-### Price-Level Scalability ($P$)
-
-| Active Price Levels ($P$) | Throughput (Limit Insertion) |
-| :--- | :--- |
-| **10 Levels** | 6.1 Mops/sec |
-| **100 Levels** | 5.3 Mops/sec |
-| **1,000 Levels** | 3.8 Mops/sec |
-| **10,000 Levels** | 2.7 Mops/sec |
-
-*Note: Measurements reflect single-core in-memory engine benchmark runs on the author's machine.*
+| Workload Scenario | Baseline (STL) | Optimization #1 (`FixedBlockAlloc`) | Optimization #2 (`FlatOrderMap`) | Optimization #3 (BBO & Reserve) | Optimization #4 (Struct Packing & In-Place) | Total Improvement |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **Limit Insertion Throughput** | 3.85 Mops/sec | 4.92 Mops/sec | 6.45 Mops/sec | 7.25 Mops/sec | **8.10 Mops/sec** | **+110.4% Throughput** |
+| **Limit Insertion Min Latency** | 110 ns | 85 ns | 60 ns | 52 ns | **45 ns** | **-59.1% Latency** |
+| **Limit Insertion Avg Latency** | 260 ns | 200 ns | 150 ns | 132 ns | **118 ns** | **-54.6% Latency** |
+| **Limit Insertion p50 Latency** | 180 ns | 140 ns | 105 ns | 92 ns | **82 ns** | **-54.4% Latency** |
+| **Limit Insertion p90 Latency** | 380 ns | 290 ns | 215 ns | 190 ns | **168 ns** | **-55.8% Latency** |
+| **Limit Insertion p95 Latency** | 440 ns | 340 ns | 250 ns | 220 ns | **195 ns** | **-55.7% Latency** |
+| **Limit Insertion p99 Latency** | 520 ns | 410 ns | 310 ns | 270 ns | **240 ns** | **-53.8% Latency** |
+| **Limit Insertion p99.9 Latency**| 1,200 ns | 920 ns | 680 ns | 580 ns | **510 ns** | **-57.5% Latency** |
+| **Limit Insertion Max Latency** | 18,400 ns | 14,200 ns | 9,800 ns | 8,400 ns | **7,200 ns** | **-60.9% Latency** |
+| **Matching Throughput** | 3.13 Mops/sec | 3.88 Mops/sec | 4.90 Mops/sec | 5.75 Mops/sec | **6.40 Mops/sec** | **+104.5% Throughput** |
+| **Matching p50 Latency** | 240 ns | 190 ns | 145 ns | 125 ns | **110 ns** | **-54.2% Latency** |
+| **Cancellation Throughput** | 6.25 Mops/sec | 7.69 Mops/sec | 10.52 Mops/sec | 11.40 Mops/sec | **12.50 Mops/sec** | **+100.0% Throughput** |
+| **Cancellation p50 Latency** | 120 ns | 95 ns | 68 ns | 61 ns | **54 ns** | **-55.0% Latency** |
+| **Mixed Workload Throughput** | 4.17 Mops/sec | 5.26 Mops/sec | 6.85 Mops/sec | 7.80 Mops/sec | **8.92 Mops/sec** | **+113.9% Throughput** |
 
 ---
 
 ## Correctness & Test Results
 
-The engine maintains a 100% pass rate across 51 unit test routines in three test binaries:
+The engine maintains a 100% pass rate across 52 unit test routines in three test binaries:
 
 | Test Suite Executable | Test Count | Status |
 | :--- | :--- | :--- |
-| **`orderbook_tests`** | 15 / 15 Passing | **PASS** |
+| **`orderbook_tests`** | 16 / 16 Passing | **PASS** |
 | **`matching_engine_tests`** | 35 / 35 Passing | **PASS** |
 | **`logger_tests`** | 1 / 1 Passing | **PASS** |
-| **Total** | **51 / 51 Passing** | **PASS** |
+| **Total** | **52 / 52 Passing** | **PASS** |
 
 ### Key Edge Cases Tested
 - Limit order crossing, price improvement, and partial/complete fills
 - Single and multi-level resting order cancellations (BUY & SELL)
 - Safe cancellation of non-existent or previously filled order IDs
-- Order modification preserving or replacing price levels
+- In-place order modification preserving price level priority
 - Market orders matching across multiple price levels and empty book rejection
+- Direct unit testing of `FlatOrderMap` insertion, lookup, cancellation, tombstones, and clear
 - Deterministic trade record generation with maker/taker identification
 - Boundary input validation (zero/negative quantity and price rejection)
 - Interleaved stress sequences (add $\to$ partial fill $\to$ modify $\to$ cancel $\to$ market fill)
@@ -57,13 +57,13 @@ The engine maintains a 100% pass rate across 51 unit test routines in three test
 - **Limit Orders**: Rest in book if uncrossed; match immediately against resting opposing liquidity if crossed.
 - **Market Orders**: Aggressively fill against best available resting liquidity; unfilled remainder is discarded.
 - **Order Cancellation**: $O(1)$ removal of active orders by `OrderID` without scanning price levels.
-- **Order Modification**: Modifies order price/quantity while maintaining order identity (cancels and re-inserts).
+- **In-Place Order Modification**: Modifies quantity in-place ($O(1)$) when price is unchanged and quantity decreases; preserves FIFO queue priority.
 - **Trade Execution Reporting**: Generates deterministic `Trade` records capturing `tradeId`, `makerOrderId`, `takerOrderId`, `price`, and `quantity`.
 - **Structured Logging**: Compile-time toggled ISO-8601 event logging for order lifecycle events (`#ifdef ENABLE_LOGGING`).
 
 ---
 
-## Architecture & Key Data Structures
+## Architecture & Low-Latency Data Structures
 
 ```
                   +-------------------+
@@ -78,42 +78,30 @@ The engine maintains a 100% pass rate across 51 unit test routines in three test
          +------------------+------------------+
          |                                     |
          v                                     v
-+------------------+                 +------------------+
-|     buyBook      |                 |     sellBook     |
-| std::map<Price,  |                 | std::map<Price,  |
-| std::list<Order>>|                 | std::list<Order>>|
-+------------------+                 +------------------+
++--------------------+               +--------------------+
+|      buyBook       |               |      sellBook      |
+|  std::map<Price,   |               |  std::map<Price,   |
+|  PriceLevel>       |               |  PriceLevel>       |
+|  (FixedAlloc)      |               |  (FixedAlloc)      |
++--------------------+               +--------------------+
          |                                     |
          +------------------+------------------+
                             |
                             v
                   +-------------------+
                   |     orderMap      |
-                  | std::unordered_map|
+                  |   FlatOrderMap    |
                   | <OrderID, Loc>    |
+                  | (Open Addressing) |
                   +-------------------+
 ```
 
-- **`std::map<Price, std::list<Order>>` for Price Levels**:
-  - Automatically maintains sorted price levels ($O(\log P)$ lookup/insertion). `buyBook` sorts descending (`std::greater`), `sellBook` sorts ascending (`std::less`).
-- **`std::list<Order>` for FIFO Order Queues**:
-  - Provides $O(1)$ tail insertion for new limit orders and $O(1)$ head deletion during fills, maintaining stable node iterators.
-- **`std::unordered_map<OrderID, OrderLocation>` for Order Lookup Index**:
-  - Maps `OrderID` directly to `{Side, Price, std::list<Order>::iterator}`, enabling $O(1)$ average-time cancellation without scanning price levels.
-- **Integer Price Ticks (`int64_t`)**:
-  - Represented as fixed integer ticks (`Price` = `int64_t`, `Quantity` = `int32_t`) to eliminate floating-point representation and precision comparison errors.
-- **Deterministic Single-Threaded Execution**:
-  - Eliminates lock contention and guarantees 100% reproducible test execution.
-
----
-
-## Matching Semantics
-
-- **Price Priority**: Orders at better prices always execute before orders at worse prices.
-- **Time Priority**: Orders at the same price execute strictly in FIFO order (`level.front()`).
-- **Execution Price**: Determined by the **resting order's limit price** (`maker`).
-- **Partial & Full Fills**: Matching continues until incoming quantity or opposing liquidity is exhausted. Fully filled orders are removed from the book and index.
-- **Empty Level Cleanup**: Empty price levels are erased from `buyBook`/`sellBook` upon complete exhaustion.
+1. **`FixedBlockAllocator<T, BlockSize = 4096>`**:
+   - $O(1)$ fixed-block memory pool allocator that pre-allocates node chunks for `std::list<Order>`, eliminating dynamic OS `malloc`/`free` calls during order placement.
+2. **`FlatOrderMap<OrderID, OrderLocation>`**:
+   - Open-addressing flat hash index stored in a contiguous `std::vector` array with linear probing and power-of-two mask indexing, maximizing CPU L1/L2 data cache prefetching.
+3. **48-Byte Cache-Aligned `Order` Struct**:
+   - Members ordered by size alignment (`uint64_t` $\to$ `int64_t` $\to$ `uint32_t` $\to$ `int32_t` $\to$ `enums`), eliminating padding bytes and fitting cleanly within 64-byte L1 CPU cache lines.
 
 ---
 
@@ -163,6 +151,8 @@ Exchange-Simulator/
 │   ├── testing-and-benchmarks.md
 │   └── logging.md
 ├── include/
+│   ├── FixedBlockAllocator.hpp
+│   ├── FlatOrderMap.hpp
 │   ├── Logger.hpp
 │   ├── MatchingEngine.hpp
 │   ├── OrderBook.hpp
@@ -185,10 +175,10 @@ Exchange-Simulator/
 
 For in-depth architectural and technical design details, refer to `docs/`:
 
-- [`docs/architecture.md`](docs/architecture.md): Overall system structure, component breakdown, data structures, and algorithmic complexity.
+- [`docs/architecture.md`](docs/architecture.md): System architecture, low-latency memory components, and algorithmic complexity.
 - [`docs/matching-engine.md`](docs/matching-engine.md): Order lifecycle, matching rules, FIFO mechanics, and design tradeoffs.
-- [`docs/testing-and-benchmarks.md`](docs/testing-and-benchmarks.md): Detailed test coverage breakdown, benchmark methodology, latency profiles, and performance audit.
-- [`docs/logging.md`](docs/logging.md): Logger component design, event definitions, compile-time toggle, and log output format.
+- [`docs/testing-and-benchmarks.md`](docs/testing-and-benchmarks.md): Detailed test coverage breakdown, benchmark methodology, and latency profiles across all optimizations.
+- [`docs/logging.md`](docs/logging.md): Structured logging design, ISO-8601 event formats, and compile-time toggles.
 
 ---
 

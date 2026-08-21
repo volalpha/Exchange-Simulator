@@ -1,13 +1,35 @@
-# CMake build directory
+# Build directories
 build/
+bin/
+lib/
+out/
 
-# Generated executables
-matching_engine_tests
-orderbook_tests
-logger_tests
+# CMake generated files
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+compile_commands.json
+*.cmake
+
+# Compiled object files & libraries
+*.o
+*.obj
+*.a
+*.so
+*.dylib
+*.dll
+*.exe
+*.out
+
+# Generated test and benchmark binaries
 exchange
+orderbook_tests
+matching_engine_tests
+logger_tests
+matching_engine_benchmarks
 
-# Benchmark-generated files
+# Benchmark artifact/output files
 10
 40
 60
@@ -17,28 +39,10 @@ exchange
 # Logs
 *.log
 
-# Editor backup files
+# Editor and OS temporary files
 *~
-
-
-# CMake build directory
-build/
-
-# Generated executables
-matching_engine_tests
-orderbook_tests
-logger_tests
-exchange
-
-# Benchmark-generated files
-10
-40
-60
-100
-4
-
-# Logs
-*.log
-
-# Editor backup files
-*~
+*.swp
+*.swo
+.DS_Store
+.vscode/
+.idea/

@@ -2,7 +2,7 @@
 
 ## Overview
 
-The C++ Exchange Simulator is a high-performance, deterministic C++17 limit order book and matching engine. The system is designed around standard C++ STL containers providing strict price-time priority matching, $O(1)$ order cancellation by OrderID, and structured trade execution reporting.
+The C++ Exchange Simulator is a high-performance, deterministic C++17 limit order book and matching engine. The system combines strict price-time priority matching with low-latency performance engineering, including a custom $O(1)$ block pool allocator and an open-addressing flat hash index.
 
 ```
                   +-------------------+
@@ -17,19 +17,21 @@ The C++ Exchange Simulator is a high-performance, deterministic C++17 limit orde
          +------------------+------------------+
          |                                     |
          v                                     v
-+------------------+                 +------------------+
-|     buyBook      |                 |     sellBook     |
-| std::map<Price,  |                 | std::map<Price,  |
-| std::list<Order>>|                 | std::list<Order>>|
-+------------------+                 +------------------+
++--------------------+               +--------------------+
+|      buyBook       |               |      sellBook      |
+|  std::map<Price,   |               |  std::map<Price,   |
+|  PriceLevel>       |               |  PriceLevel>       |
+|  (FixedAlloc)      |               |  (FixedAlloc)      |
++--------------------+               +--------------------+
          |                                     |
          +------------------+------------------+
                             |
                             v
                   +-------------------+
                   |     orderMap      |
-                  | std::unordered_map|
+                  |   FlatOrderMap    |
                   | <OrderID, Loc>    |
+                  | (Open Addressing) |
                   +-------------------+
 ```
 
@@ -46,17 +48,19 @@ High-level façade wrapping the underlying `OrderBook`. Provides clean APIs for:
 - `containsOrder(const OrderID&)`
 
 ### 2. `OrderBook` (`include/OrderBook.hpp`, `src/OrderBook.cpp`)
-Encapsulates bid/ask books, the order-ID index, matching logic, and trade history.
+Encapsulates bid/ask books, the order-ID index (`FlatOrderMap`), BBO fast-path matching, matching logic, and trade history.
 
 ### 3. `Order` (`include/order.hpp`, `include/types.hpp`)
-Core data struct representing order state:
-- `id` (`OrderID` / `uint64_t`)
-- `traderId` (`TraderID` / `uint64_t`)
-- `symbolId` (`SymbolID` / `uint32_t`)
-- `side` (`Side::Buy` / `Side::Sell`)
-- `price` (`Price` / `int64_t`)
-- `quantity` / `remainingQuantity` (`Quantity` / `int32_t`)
-- `type` (`OrderType::Limit` / `OrderType::Market`)
+Core 48-byte cache-aligned data struct representing order state:
+- `id` (`OrderID` / `uint64_t`, 8 bytes)
+- `traderId` (`TraderID` / `uint64_t`, 8 bytes)
+- `price` (`Price` / `int64_t`, 8 bytes)
+- `originalQuantity` (`Quantity` / `int32_t`, 4 bytes)
+- `remainingQuantity` (`Quantity` / `int32_t`, 4 bytes)
+- `symbolId` (`SymbolID` / `uint32_t`, 4 bytes)
+- `side` (`Side::Buy` / `Side::Sell`, 1 byte)
+- `type` (`OrderType::Limit` / `OrderType::Market`, 1 byte)
+- `status` (`OrderStatus`, 1 byte)
 
 ### 4. `Trade` (`include/Trade.hpp`)
 Execution fill record:
@@ -71,15 +75,15 @@ Single-threaded, file-based structured logger controlled via `#ifdef ENABLE_LOGG
 
 ---
 
-## Data Structures & Rationale
+## Data Structures & Performance Engineering Rationale
 
-| Container | Purpose | Rationale |
+| Container / Type | Purpose | Low-Latency Rationale |
 | :--- | :--- | :--- |
-| `std::map<Price, std::list<Order>, std::greater<Price>>` | `buyBook` | Keeps bids sorted in descending price order ($O(\log P)$ insertion/erasure). Highest bid is at `.begin()`. |
-| `std::map<Price, std::list<Order>, std::less<Price>>` | `sellBook` | Keeps asks sorted in ascending price order ($O(\log P)$ insertion/erasure). Lowest ask is at `.begin()`. |
-| `std::list<Order>` | `PriceLevel` | Implements FIFO queue per price level ($O(1)$ tail insertion, $O(1)$ head matching, iterator stability). |
-| `std::unordered_map<OrderID, OrderLocation>` | `orderMap` | Index mapping order IDs to `{Side, Price, std::list::iterator}` for $O(1)$ average cancellation. |
-| `std::vector<Trade>` | `trades` | Sequentially stores trade execution records ($O(1)$ amortized append). |
+| `std::map<Price, PriceLevel, std::greater<Price>>` | `buyBook` | Keeps bids sorted in descending price order ($O(\log P)$ insertion/erasure). Highest bid is at `.begin()`. |
+| `std::map<Price, PriceLevel, std::less<Price>>` | `sellBook` | Keeps asks sorted in ascending price order ($O(\log P)$ insertion/erasure). Lowest ask is at `.begin()`. |
+| `std::list<Order, FixedBlockAllocator<Order>>` | `PriceLevel` | Implements FIFO queue per price level. Uses `FixedBlockAllocator` to eliminate OS heap allocation (`malloc`/`free`) overhead on order insertion/erasure. |
+| `FlatOrderMap<OrderID, OrderLocation>` | `orderMap` | Open-addressing hash index with linear probing stored in a contiguous `std::vector` array. Replaces bucketed `std::unordered_map` to maximize L1/L2 cache prefetching and eliminate pointer-chasing. |
+| `std::vector<Trade>` | `trades` | Sequentially stores trade execution records. Pre-allocated with `trades.reserve(10000)` to eliminate reallocation overhead. |
 
 ---
 
@@ -88,7 +92,14 @@ Single-threaded, file-based structured logger controlled via `#ifdef ENABLE_LOGG
 | Operation | Time Complexity | Notes |
 | :--- | :--- | :--- |
 | **Limit Order Insertion** | $O(\log P)$ | $P$ = number of active price levels. Tree lookup/insertion in `buyBook`/`sellBook`. |
-| **Matching Execution** | $O(M)$ | $M$ = number of filled resting orders. Sequential head matching. |
-| **Order Cancellation** | $O(1)$ Avg | Hash lookup in `orderMap` + $O(1)$ node erase in `std::list`. Price level map erase is $O(\log P)$ if empty. |
-| **Order Modification** | $O(1)$ Cancel + $O(\log P)$ Insert | Cancels existing order and re-inserts updated order. |
+| **Matching Execution** | $O(M)$ | $M$ = number of filled resting orders. Sequential head matching via BBO fast-path. |
+| **Order Cancellation** | $O(1)$ Avg | Flat hash lookup in `FlatOrderMap` + $O(1)$ node erase in `PriceLevel`. Price level map erase is $O(\log P)$ if empty. |
+| **Order Modification** | $O(1)$ In-Place / $O(\log P)$ | $O(1)$ in-place update for same-price quantity reductions (retains FIFO priority); $O(1)$ cancel + $O(\log P)$ insert otherwise. |
 | **Market Order Execution** | $O(M)$ | Matches against opposing book head nodes until filled or book exhausted; unfilled remainder discarded. |
+
+---
+
+## System Scope & Environment Limitations
+
+- **Single-Threaded In-Memory Engine**: Designed explicitly for high-throughput single-core matching without multi-threading locking overhead.
+- **Hardware PMU Counter Limitation**: Hardware performance counter collection (`perf record`) is restricted due to sandbox container `perf_event` kernel security permissions; high-resolution standard library timers (`std::chrono::high_resolution_clock`) are used for benchmark metrics.

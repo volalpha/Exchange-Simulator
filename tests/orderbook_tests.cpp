@@ -363,6 +363,51 @@ int main()
 
     std::cout << "TEST 15 PASSED: Non-crossing order rests\n";
 }
+// TEST 16: FLAT ORDER MAP DIRECT UNIT TESTS
+{
+    FlatOrderMap<uint64_t, int> map;
+    assert(map.empty());
+    assert(map.size() == 0);
+
+    // Insertion & Lookup
+    for (uint64_t i = 1; i <= 1000; ++i)
+    {
+        map[i] = static_cast<int>(i * 10);
+    }
+    assert(map.size() == 1000);
+
+    for (uint64_t i = 1; i <= 1000; ++i)
+    {
+        auto it = map.find(i);
+        assert(it != map.end());
+        assert(it->second == static_cast<int>(i * 10));
+    }
+
+    // Erase & Tombstone verification
+    for (uint64_t i = 1; i <= 500; ++i)
+    {
+        assert(map.erase(i));
+    }
+    assert(map.size() == 500);
+
+    for (uint64_t i = 1; i <= 500; ++i)
+    {
+        assert(map.find(i) == map.end());
+    }
+
+    for (uint64_t i = 501; i <= 1000; ++i)
+    {
+        auto it = map.find(i);
+        assert(it != map.end());
+        assert(it->second == static_cast<int>(i * 10));
+    }
+
+    map.clear();
+    assert(map.empty());
+    assert(map.size() == 0);
+
+    std::cout << "TEST 16 PASSED: FlatOrderMap direct unit tests\n";
+}
     std::cout << "\nALL TESTS PASSED\n";
 
     return 0;

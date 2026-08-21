@@ -3,6 +3,11 @@
 #include <algorithm>
 #include <iostream>
 
+OrderBook::OrderBook()
+{
+    trades.reserve(10000);
+}
+
 bool OrderBook::empty() const
 {
     return buyBook.empty() && sellBook.empty();
@@ -296,7 +301,15 @@ bool OrderBook::modifyOrder(const OrderID& id, Price newPrice, Quantity newQuant
 
     LOG_ORDER_MODIFIED(id, newPrice, newQuantity);
 
-    const OrderLocation& loc = it->second;
+    OrderLocation& loc = it->second;
+
+    if (newPrice == loc.price && newQuantity <= loc.iterator->remainingQuantity)
+    {
+        loc.iterator->remainingQuantity = newQuantity;
+        loc.iterator->originalQuantity = newQuantity;
+        return true;
+    }
+
     Side side = loc.side;
     TraderID traderId = loc.iterator->traderId;
     SymbolID symbolId = loc.iterator->symbolId;

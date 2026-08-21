@@ -7,8 +7,10 @@
 
 #include "order.hpp"
 #include "Trade.hpp"
+#include "FixedBlockAllocator.hpp"
+#include "FlatOrderMap.hpp"
 
-using PriceLevel = std::list<Order>;
+using PriceLevel = std::list<Order, FixedBlockAllocator<Order>>;
 using BuyBook = std::map<Price, PriceLevel, std::greater<Price>>;
 using SellBook = std::map<Price, PriceLevel>;
 
@@ -16,19 +18,22 @@ struct OrderLocation
 {
     Side side;
     Price price;
-    std::list<Order>::iterator iterator;
+    PriceLevel::iterator iterator;
 };
+
+using OrderMap = FlatOrderMap<OrderID, OrderLocation>;
 
 class OrderBook
 {
 private:
     BuyBook buyBook;
     SellBook sellBook;
-    std::unordered_map<OrderID, OrderLocation> orderMap;
+    OrderMap orderMap;
     std::vector<Trade> trades;
     TradeID nextTradeId = 1;
 
 public:
+    OrderBook();
     void addOrder(const Order& order);
     void processMarketOrder(const Order& order);
     void cancelOrder(const OrderID& orderID);
