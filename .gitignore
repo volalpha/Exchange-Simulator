@@ -1,0 +1,44 @@
+# CMake build directory
+build/
+
+# Generated executables
+matching_engine_tests
+orderbook_tests
+logger_tests
+exchange
+
+# Benchmark-generated files
+10
+40
+60
+100
+4
+
+# Logs
+*.log
+
+# Editor backup files
+*~
+
+
+# CMake build directory
+build/
+
+# Generated executables
+matching_engine_tests
+orderbook_tests
+logger_tests
+exchange
+
+# Benchmark-generated files
+10
+40
+60
+100
+4
+
+# Logs
+*.log
+
+# Editor backup files
+*~
