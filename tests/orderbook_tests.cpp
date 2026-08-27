@@ -4,9 +4,7 @@
 
 int main()
 {
-    // =========================================
     // TEST 1: BUY ORDER RESTS
-    // =========================================
 
     {
         OrderBook book;
@@ -26,10 +24,7 @@ int main()
         std::cout << "TEST 1 PASSED: Buy rests\n";
     }
 
-
-    // =========================================
     // TEST 2: SELL ORDER RESTS
-    // =========================================
 
     {
         OrderBook book;
@@ -49,10 +44,7 @@ int main()
         std::cout << "TEST 2 PASSED: Sell rests\n";
     }
 
-
-    // =========================================
     // TEST 3: FULL MATCH
-    // =========================================
 
     {
         OrderBook book;
@@ -83,11 +75,7 @@ int main()
         std::cout << "TEST 3 PASSED: Full match\n";
     }
 
-
-    // =========================================
     // TEST 4: PARTIAL MATCH
-    // =========================================
-
     {
         OrderBook book;
 
@@ -112,7 +100,7 @@ int main()
         book.addOrder(buy);
         book.addOrder(sell);
 
-        // Remaining BUY order should rest
+        // Remaining BUY order should rest in this one...
         assert(book.size() == 1);
 
         std::cout << "TEST 4 PASSED: Partial match\n";
@@ -120,10 +108,7 @@ int main()
         book.print();
     }
 
-
-    // =========================================
     // TEST 5: CANCEL BUY
-    // =========================================
 
     {
         OrderBook book;
@@ -148,10 +133,8 @@ int main()
         std::cout << "TEST 5 PASSED: Cancel buy\n";
     }
 
-
-    // =========================================
     // TEST 6: CANCEL SELL
-    // =========================================
+
 
     {
         OrderBook book;
@@ -176,10 +159,8 @@ int main()
         std::cout << "TEST 6 PASSED: Cancel sell\n";
     }
 
-
-    // =========================================
     // TEST 7: CANCEL NON-EXISTENT ORDER
-    // =========================================
+
 
     {
         OrderBook book;
@@ -202,9 +183,9 @@ int main()
         std::cout << "TEST 7 PASSED: Cancel non-existent order\n";
     }
 
-    // =========================================
+
 // TEST 8: FIFO AT SAME PRICE
-// =========================================
+
 
 {
     OrderBook book;

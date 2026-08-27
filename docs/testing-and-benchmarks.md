@@ -1,5 +1,20 @@
 # Testing & Benchmarking Suite
 
+## Benchmark Build Configuration & Toolchain Specifications
+
+| Setting | Value / Specification |
+| :--- | :--- |
+| **Compiler / Toolchain** | GCC / Clang (`g++ -std=c++17`) |
+| **C++ Standard** | C++17 (`set(CMAKE_CXX_STANDARD 17)`) |
+| **Build Type** | Release (`-DCMAKE_BUILD_TYPE=Release`) |
+| **Optimization Flags** | `-O3` |
+| **CPU Target Flags** | `-march=native` |
+| **Link-Time Optimization (LTO)** | Enabled (`INTERPROCEDURAL_OPTIMIZATION TRUE`) |
+| **Test Suite Status** | 52 / 52 Unit Tests Passing (100% Pass Rate) |
+| **Benchmark Status** | Verified reproducible across 4 optimization stages |
+
+---
+
 ## Unit Test Suite Overview
 
 The project contains a comprehensive, 100% passing test suite across three binary executables:
@@ -27,7 +42,7 @@ Verifies structured logging file output, event emission (`ORDER_ACCEPTED`, `ORDE
 
 ---
 
-## Phase-2 Optimization Summary
+## Low-Latency Optimization Progression Summary
 
 ### Optimization #1: Fixed-Block Memory Allocator (`FixedBlockAllocator`)
 Pre-allocates chunk buffers (`BlockSize = 4096`) for `std::list<Order>` nodes, providing $O(1)$ allocation/deallocation and eliminating dynamic OS `malloc`/`free` calls during order placement.

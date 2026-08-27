@@ -57,9 +57,8 @@ int main()
 
     std::cout << "TEST 2 PASSED: Crossing orders processed\n";
 }
-// ============================================================
 // TEST 3: Full fill
-// ============================================================
+
 {
     MatchingEngine engine;
 
@@ -92,9 +91,9 @@ int main()
 }
 
 
-// ============================================================
+
 // TEST 4: Partial fill
-// ============================================================
+
 {
     MatchingEngine engine;
 
@@ -125,11 +124,8 @@ int main()
 
     std::cout << "TEST 4 PASSED: Partial fill\n";
 }
-
-
-// ============================================================
 // TEST 5: Non-crossing orders
-// ============================================================
+
 {
     MatchingEngine engine;
 
@@ -161,10 +157,8 @@ int main()
     std::cout << "TEST 5 PASSED: Non-crossing orders rest\n";
 }
 
-
-// ============================================================
 // TEST 6: Multiple orders
-// ============================================================
+
 {
     MatchingEngine engine;
 
@@ -199,11 +193,11 @@ int main()
     engine.processOrder(sell);
     // FIFO:
     //
-    // buy1 = 50 -> completely filled
+    // first buy1 = 50 -> completely filled
     // sell remaining = 10
     // buy2 = 30 -> 10 gets filled
     // buy2 remaining = 20
-    //
+    // DONE!!
     // Therefore:
     // BUY book contains buy2 (20)
     // SELL book is empty
@@ -213,9 +207,9 @@ int main()
 }
 
 
-// ============================================================
+
 // TEST 7: Price priority
-// ============================================================
+
 {
     MatchingEngine engine;
 
@@ -255,7 +249,7 @@ int main()
     // SELL @100 must match BUY @100 first.
     // BUY @99 does not cross SELL @100 and therefore remains.
     //
-    // Expected:
+    // Expected in the results that:
     // buy2 -> completely filled
     // buy1 -> remains
     assert(engine.getOrderBook().size() == 1);
@@ -266,9 +260,9 @@ int main()
 }
 
 
-// ============================================================
+
 // TEST 8: FIFO at same price
-// ============================================================
+
 {
     MatchingEngine engine;
 
@@ -315,18 +309,15 @@ int main()
     engine.getOrderBook().print();
 
     // Cancel buy2.
-    // If FIFO was correct, buy2 is the only remaining order.
+    // If FIFO was correct, buy2 is the only remaining order for this one.
     engine.getOrderBook().cancelOrder(16);
 
     assert(engine.getOrderBook().size() == 0);
 
     std::cout << "TEST 8 PASSED: FIFO at same price\n";
 }
-
-
-// ============================================================
 // TEST 9: Multiple price levels
-// ============================================================
+
 {
     MatchingEngine engine;
 
@@ -373,10 +364,8 @@ int main()
     engine.getOrderBook().print();
     std::cout << "TEST 9 PASSED: Multiple price levels\n";
 }
-
-// ============================================================
 // TEST 10: Cancel resting BUY order
-// ============================================================
+
 {
     MatchingEngine engine;
 
@@ -392,9 +381,8 @@ int main()
     std::cout << "TEST 10 PASSED: Cancel resting BUY order\n";
 }
 
-// ============================================================
 // TEST 11: Cancel resting SELL order
-// ============================================================
+
 {
     MatchingEngine engine;
 
@@ -409,10 +397,8 @@ int main()
 
     std::cout << "TEST 11 PASSED: Cancel resting SELL order\n";
 }
-
-// ============================================================
 // TEST 12: Cancel one order while another remains
-// ============================================================
+
 {
     MatchingEngine engine;
 
@@ -433,9 +419,7 @@ int main()
     std::cout << "TEST 12 PASSED: Cancel one order while another remains\n";
 }
 
-// ============================================================
 // TEST 13: Cancel nonexistent order
-// ============================================================
 {
     MatchingEngine engine;
 
@@ -450,10 +434,7 @@ int main()
 
     std::cout << "TEST 13 PASSED: Cancel nonexistent order\n";
 }
-
-// ============================================================
 // TEST 14: Cancel after partial fill
-// ============================================================
 {
     MatchingEngine engine;
 
@@ -465,17 +446,13 @@ int main()
 
     // 40 SELL matches against 40 of BUY. BUY (ID 26) has 60 remaining.
     assert(engine.getOrderBook().size() == 1);
-
     engine.cancelOrder(26);
-
     assert(engine.getOrderBook().size() == 0);
-
     std::cout << "TEST 14 PASSED: Cancel after partial fill\n";
 }
 
-// ============================================================
 // TEST 15: Cancel at one price level while another price level remains
-// ============================================================
+
 {
     MatchingEngine engine;
 
@@ -504,9 +481,9 @@ int main()
     std::cout << "TEST 15 PASSED: Cancel at one price level while another price level remains\n";
 }
 
-// ============================================================
-// TEST 16: Order-ID Index Verification (a through f)
-// ============================================================
+
+// TEST 16: Order-ID Index Verification (a through f (steps breakdown))
+
 {
     MatchingEngine engine;
 
@@ -558,9 +535,9 @@ int main()
     std::cout << "TEST 16 PASSED: Order-ID Index correctness verified (a-f)\n";
 }
 
-// ============================================================
+
 // TEST 17: Modify quantity
-// ============================================================
+
 {
     MatchingEngine engine;
 
@@ -584,9 +561,9 @@ int main()
     std::cout << "TEST 17 PASSED: Modify quantity\n";
 }
 
-// ============================================================
+
 // TEST 18: Modify price
-// ============================================================
+
 {
     MatchingEngine engine;
 
@@ -610,9 +587,9 @@ int main()
     std::cout << "TEST 18 PASSED: Modify price\n";
 }
 
-// ============================================================
+
 // TEST 19: Replace order / FIFO priority
-// ============================================================
+
 {
     MatchingEngine engine;
 
@@ -637,10 +614,8 @@ int main()
 
     std::cout << "TEST 19 PASSED: Replace order / FIFO priority\n";
 }
-
-// ============================================================
 // TEST 20: Modify/cancel edge cases
-// ============================================================
+
 {
     MatchingEngine engine;
 
@@ -680,10 +655,8 @@ int main()
 
     std::cout << "TEST 20 PASSED: Modify/cancel edge cases\n";
 }
-
-// ============================================================
 // TEST 21: Market BUY complete fill
-// ============================================================
+
 {
     MatchingEngine engine;
 
@@ -700,10 +673,8 @@ int main()
 
     std::cout << "TEST 21 PASSED: Market BUY complete fill\n";
 }
-
-// ============================================================
 // TEST 22: Market SELL complete fill
-// ============================================================
+
 {
     MatchingEngine engine;
 
@@ -720,10 +691,8 @@ int main()
 
     std::cout << "TEST 22 PASSED: Market SELL complete fill\n";
 }
-
-// ============================================================
 // TEST 23: Market BUY across multiple price levels
-// ============================================================
+
 {
     MatchingEngine engine;
 
@@ -752,9 +721,7 @@ int main()
     std::cout << "TEST 23 PASSED: Market BUY across multiple price levels\n";
 }
 
-// ============================================================
 // TEST 24: Market SELL across multiple price levels
-// ============================================================
 {
     MatchingEngine engine;
 
@@ -782,10 +749,8 @@ int main()
 
     std::cout << "TEST 24 PASSED: Market SELL across multiple price levels\n";
 }
-
-// ============================================================
 // TEST 25: Market order insufficient liquidity / empty book
-// ============================================================
+
 {
     MatchingEngine engine;
 
@@ -829,10 +794,8 @@ int main()
 
     std::cout << "TEST 25 PASSED: Market order insufficient liquidity / empty book\n";
 }
-
-// ============================================================
 // TEST 26: Single full trade execution
-// ============================================================
+
 {
     MatchingEngine engine;
 
@@ -848,7 +811,6 @@ int main()
     assert(trades[0].price == 100);
     assert(trades[0].makerOrderId == 72);
     assert(trades[0].takerOrderId == 73);
-
     assert(!engine.containsOrder(72));
     assert(!engine.containsOrder(73));
     assert(engine.getOrderBook().empty());
@@ -856,9 +818,9 @@ int main()
     std::cout << "TEST 26 PASSED: Single full trade execution\n";
 }
 
-// ============================================================
+
 // TEST 27: Partial fill trade execution
-// ============================================================
+
 {
     MatchingEngine engine;
 
@@ -874,17 +836,14 @@ int main()
     assert(trades[0].price == 100);
     assert(trades[0].makerOrderId == 74);
     assert(trades[0].takerOrderId == 75);
-
     assert(engine.containsOrder(74));  // BUY remains with 60
     assert(!engine.containsOrder(75)); // SELL fully filled
     assert(engine.getOrderBook().size() == 1);
 
     std::cout << "TEST 27 PASSED: Partial fill trade execution\n";
 }
-
-// ============================================================
 // TEST 28: Multiple trade executions
-// ============================================================
+
 {
     MatchingEngine engine;
 
@@ -918,10 +877,8 @@ int main()
 
     std::cout << "TEST 28 PASSED: Multiple trade executions\n";
 }
-
-// ============================================================
 // TEST 29: Multi-price trade execution
-// ============================================================
+
 {
     MatchingEngine engine;
 
@@ -947,7 +904,6 @@ int main()
     assert(trades[1].takerOrderId == 81);
     assert(trades[1].price == 99);
     assert(trades[1].quantity == 20);
-
     assert(!engine.containsOrder(79));
     assert(engine.containsOrder(80)); // buy2 has 20 remaining @ 99
     assert(!engine.containsOrder(81));
@@ -956,9 +912,8 @@ int main()
     std::cout << "TEST 29 PASSED: Multi-price trade execution\n";
 }
 
-// ============================================================
 // TEST 30: Trade record integrity
-// ============================================================
+
 {
     MatchingEngine engine;
 
@@ -1000,9 +955,9 @@ int main()
     std::cout << "TEST 30 PASSED: Trade record integrity\n";
 }
 
-// ============================================================
-// TEST 31: Empty book / no liquidity behavior
-// ============================================================
+
+// TEST 31: Empty book/ no liquidity behavior
+
 {
     MatchingEngine engine;
 
@@ -1037,9 +992,9 @@ int main()
     std::cout << "TEST 31 PASSED: Empty book / no liquidity behavior\n";
 }
 
-// ============================================================
+
 // TEST 32: Exact quantity / boundary matching behavior
-// ============================================================
+
 {
     MatchingEngine engine;
 
@@ -1079,9 +1034,10 @@ int main()
     std::cout << "TEST 32 PASSED: Exact quantity / boundary matching behavior\n";
 }
 
-// ============================================================
+
 // TEST 33: Multiple orders at same price with cancellation/interleaving
-// ============================================================
+
+
 {
     MatchingEngine engine;
 
@@ -1124,14 +1080,14 @@ int main()
     engine.processOrder(sell2);
 
     assert(!engine.containsOrder(111));
-    assert(engine.getOrderBook().empty()); // Price level 100 fully erased
+    assert(engine.getOrderBook().empty()); // Price level 100 fully erased !!!!!!!!
 
     std::cout << "TEST 33 PASSED: Multiple orders at same price with cancellation/interleaving\n";
 }
 
-// ============================================================
+
 // TEST 34: Invalid or boundary order inputs
-// ============================================================
+
 {
     MatchingEngine engine;
 
@@ -1158,16 +1114,16 @@ int main()
     engine.processOrder(invalidPriceNeg);
     assert(!engine.containsOrder(117));
 
-    // Cancel boundary/nonexistent IDs
+    // Cancel boundary/nonexistent IDs.
     engine.cancelOrder(0);
     engine.cancelOrder(UINT64_MAX);
 
-    // Modify with invalid values
+    // Modify with invalid values..
     assert(!engine.modifyOrder(113, -50, 50));
     assert(!engine.modifyOrder(113, 100, -10));
     assert(!engine.modifyOrder(99999, 100, 50));
 
-    // Verify buy1 (113) remains completely valid and uncorrupted
+    // Verify buy1 (113) remains completely valid and uncorrupted..........
     assert(engine.containsOrder(113));
     assert(engine.getOrderBook().size() == 1);
 
@@ -1177,9 +1133,7 @@ int main()
     std::cout << "TEST 34 PASSED: Invalid or boundary order inputs\n";
 }
 
-// ============================================================
 // TEST 35: Stress-style sequence of operations
-// ============================================================
 {
     MatchingEngine engine;
 

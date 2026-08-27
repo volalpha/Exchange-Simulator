@@ -75,6 +75,7 @@ void OrderBook::addOrder(const Order& order)
 
     Order incoming = order;
 
+    // ==================== BUY ORDER MATCHING & RESTING LOGIC ====================
     if (incoming.side == Side::Buy)
     {
         auto bestAsk = sellBook.begin();
@@ -120,6 +121,7 @@ void OrderBook::addOrder(const Order& order)
             orderMap[incoming.id] = {Side::Buy, incoming.price, it};
         }
     }
+    // ==================== SELL ORDER MATCHING & RESTING LOGIC ====================
     else
     {
         auto bestBid = buyBook.begin();
@@ -176,6 +178,7 @@ void OrderBook::processMarketOrder(const Order& order)
 
     Order incoming = order;
 
+    // --- BUY MARKET ORDER MATCHING LOGIC ---
     if (incoming.side == Side::Buy)
     {
         auto bestAsk = sellBook.begin();
@@ -209,6 +212,7 @@ void OrderBook::processMarketOrder(const Order& order)
             }
         }
     }
+    // --- SELL MARKET ORDER MATCHING LOGIC ---
     else
     {
         auto bestBid = buyBook.begin();

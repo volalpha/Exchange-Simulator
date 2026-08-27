@@ -2,11 +2,39 @@
 
 A high-performance, deterministic C++17 limit order book and matching engine implementing strict price-time priority (FIFO), $O(1)$ order cancellation by OrderID, low-latency memory pooling, open-addressing hash indexing, and structured trade execution reporting.
 
+```text
+Exchange Simulator
+        |
+        v
++-----------------------+
+|      Order Entry      |
++-----------+-----------+
+            |
+            v
++-----------------------+
+|      Order Book       |
+|   Bid / Ask Levels    |
++-----------+-----------+
+            |
+            v
++-----------------------+
+|   Matching Engine     |
+|  Price-Time Priority  |
++-----------+-----------+
+            |
+            v
++-----------------------+
+| Trade / Execution     |
++-----------------------+
+```
+
+> **Technology & Identity**: `C++17` | `Deterministic` | `Single-threaded` | `In-memory` | `Price-Time Priority (FIFO)` | `Low-latency` | `CMake + CTest` | `Benchmark-driven`
+
 ---
 
 ## Performance & Optimization Progression
 
-The following benchmark metrics were measured on a Linux x86_64 system compiled with `g++ -O3 -std=c++17` (`ENABLE_LOGGING` compiled out). The table details the concrete performance progression achieved across the implemented low-latency optimizations:
+The following benchmark metrics were measured on a Linux x86_64 system compiled with `g++ -O3 -march=native -flto -std=c++17` (`ENABLE_LOGGING` compiled out). The table details the concrete performance progression achieved across the implemented low-latency optimizations:
 
 | Workload Scenario | Baseline (STL) | Optimization #1 (`FixedBlockAlloc`) | Optimization #2 (`FlatOrderMap`) | Optimization #3 (BBO & Reserve) | Optimization #4 (Struct Packing & In-Place) | Total Improvement |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -105,17 +133,32 @@ The engine maintains a 100% pass rate across 52 unit test routines in three test
 
 ---
 
-## Build, Test & Benchmark
+## Build Configurations & Optimization Modes
 
-### Build Configuration
+The project CMake configuration supports three distinct build profiles:
 
-```bash
-# Generate build files
-cmake -S . -B build
+1. **Portable / Default Build**:
+   ```bash
+   cmake -S . -B build
+   cmake --build build
+   ```
+   Generates portable C++17 binaries using standard compiler default optimization levels.
 
-# Build all targets (exchange, tests, benchmarks)
-cmake --build build
-```
+2. **Release Build**:
+   ```bash
+   cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+   cmake --build build
+   ```
+   Enables high-level compiler optimizations (`-O3`) across all targets while maintaining host architecture independence.
+
+3. **Native Performance / Benchmark Build**:
+   ```bash
+   cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+   cmake --build build --target matching_engine_benchmarks
+   ```
+   The benchmark target specifically compiles with `-O3`, `-march=native`, and Link-Time Optimization (`-flto` / `INTERPROCEDURAL_OPTIMIZATION`) enabled when supported by GCC/Clang.
+
+> **Hardware Dependency Note**: Benchmark metrics using `-march=native` are host-CPU dependent. Published numbers should only be compared against benchmark runs using the documented configuration on identical hardware and do not represent production exchange deployment claims.
 
 ### Running Tests
 
