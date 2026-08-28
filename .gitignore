@@ -29,6 +29,12 @@ matching_engine_tests
 logger_tests
 matching_engine_benchmarks
 
+# Accidental binary artifacts in include/
+include/OrderBook
+include/matchE
+include/order
+include/types
+
 # Benchmark artifact/output files
 10
 40
