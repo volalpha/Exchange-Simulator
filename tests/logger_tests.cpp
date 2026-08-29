@@ -3,7 +3,6 @@
 #include <fstream>
 #include <string>
 
-#define ENABLE_LOGGING
 #include "MatchingEngine.hpp"
 #include "Logger.hpp"
 

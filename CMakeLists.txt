@@ -47,6 +47,12 @@ add_executable(logger_tests
 target_include_directories(logger_tests PRIVATE include)
 target_compile_definitions(logger_tests PRIVATE ENABLE_LOGGING)
 
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+    target_compile_options(orderbook_tests PRIVATE -UNDEBUG)
+    target_compile_options(matching_engine_tests PRIVATE -UNDEBUG)
+    target_compile_options(logger_tests PRIVATE -UNDEBUG)
+endif()
+
 # Register CTest unit tests
 enable_testing()
 add_test(NAME OrderBookTests COMMAND orderbook_tests)

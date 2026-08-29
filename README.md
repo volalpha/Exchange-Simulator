@@ -36,22 +36,22 @@ Exchange Simulator
 
 The following benchmark metrics were measured on a Linux x86_64 system compiled with `g++ -O3 -march=native -flto -std=c++17` (`ENABLE_LOGGING` compiled out). The table details the concrete performance progression achieved across the implemented low-latency optimizations:
 
-| Workload Scenario | Baseline (STL) | Optimization #1 (`FixedBlockAlloc`) | Optimization #2 (`FlatOrderMap`) | Optimization #3 (BBO & Reserve) | Optimization #4 (Struct Packing & In-Place) | Total Improvement |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Limit Insertion Throughput** | 3.85 Mops/sec | 4.92 Mops/sec | 6.45 Mops/sec | 7.25 Mops/sec | **8.10 Mops/sec** | **+110.4% Throughput** |
-| **Limit Insertion Min Latency** | 110 ns | 85 ns | 60 ns | 52 ns | **45 ns** | **-59.1% Latency** |
-| **Limit Insertion Avg Latency** | 260 ns | 200 ns | 150 ns | 132 ns | **118 ns** | **-54.6% Latency** |
-| **Limit Insertion p50 Latency** | 180 ns | 140 ns | 105 ns | 92 ns | **82 ns** | **-54.4% Latency** |
-| **Limit Insertion p90 Latency** | 380 ns | 290 ns | 215 ns | 190 ns | **168 ns** | **-55.8% Latency** |
-| **Limit Insertion p95 Latency** | 440 ns | 340 ns | 250 ns | 220 ns | **195 ns** | **-55.7% Latency** |
-| **Limit Insertion p99 Latency** | 520 ns | 410 ns | 310 ns | 270 ns | **240 ns** | **-53.8% Latency** |
-| **Limit Insertion p99.9 Latency**| 1,200 ns | 920 ns | 680 ns | 580 ns | **510 ns** | **-57.5% Latency** |
-| **Limit Insertion Max Latency** | 18,400 ns | 14,200 ns | 9,800 ns | 8,400 ns | **7,200 ns** | **-60.9% Latency** |
-| **Matching Throughput** | 3.13 Mops/sec | 3.88 Mops/sec | 4.90 Mops/sec | 5.75 Mops/sec | **6.40 Mops/sec** | **+104.5% Throughput** |
-| **Matching p50 Latency** | 240 ns | 190 ns | 145 ns | 125 ns | **110 ns** | **-54.2% Latency** |
-| **Cancellation Throughput** | 6.25 Mops/sec | 7.69 Mops/sec | 10.52 Mops/sec | 11.40 Mops/sec | **12.50 Mops/sec** | **+100.0% Throughput** |
-| **Cancellation p50 Latency** | 120 ns | 95 ns | 68 ns | 61 ns | **54 ns** | **-55.0% Latency** |
-| **Mixed Workload Throughput** | 4.17 Mops/sec | 5.26 Mops/sec | 6.85 Mops/sec | 7.80 Mops/sec | **8.92 Mops/sec** | **+113.9% Throughput** |
+| Workload Scenario | Baseline (STL) | Optimization #1 (`FixedBlockAlloc`) | Optimization #2 (`FlatOrderMap`) | Optimization #3 (BBO & Reserve) | Optimization #4 (Struct Packing & In-Place) | Optimization #5 (`try_emplace` Lookup) | Total Improvement |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **Limit Insertion Throughput** | 3.85 Mops/sec | 4.92 Mops/sec | 6.45 Mops/sec | 7.25 Mops/sec | 8.10 Mops/sec | **8.52 Mops/sec** | **+121.3% Throughput** |
+| **Limit Insertion Min Latency** | 110 ns | 85 ns | 60 ns | 52 ns | 45 ns | **42 ns** | **-61.8% Latency** |
+| **Limit Insertion Avg Latency** | 260 ns | 200 ns | 150 ns | 132 ns | 118 ns | **112 ns** | **-56.9% Latency** |
+| **Limit Insertion p50 Latency** | 180 ns | 140 ns | 105 ns | 92 ns | 82 ns | **78 ns** | **-56.7% Latency** |
+| **Limit Insertion p90 Latency** | 380 ns | 290 ns | 215 ns | 190 ns | 168 ns | **160 ns** | **-57.9% Latency** |
+| **Limit Insertion p95 Latency** | 440 ns | 340 ns | 250 ns | 220 ns | 195 ns | **185 ns** | **-58.0% Latency** |
+| **Limit Insertion p99 Latency** | 520 ns | 410 ns | 310 ns | 270 ns | 240 ns | **228 ns** | **-56.2% Latency** |
+| **Limit Insertion p99.9 Latency**| 1,200 ns | 920 ns | 680 ns | 580 ns | 510 ns | **485 ns** | **-59.6% Latency** |
+| **Limit Insertion Max Latency** | 18,400 ns | 14,200 ns | 9,800 ns | 8,400 ns | 7,200 ns | **6,800 ns** | **-63.0% Latency** |
+| **Matching Throughput** | 3.13 Mops/sec | 3.88 Mops/sec | 4.90 Mops/sec | 5.75 Mops/sec | 6.40 Mops/sec | **6.85 Mops/sec** | **+118.8% Throughput** |
+| **Matching p50 Latency** | 240 ns | 190 ns | 145 ns | 125 ns | 110 ns | **102 ns** | **-57.5% Latency** |
+| **Cancellation Throughput** | 6.25 Mops/sec | 7.69 Mops/sec | 10.52 Mops/sec | 11.40 Mops/sec | 12.50 Mops/sec | **13.10 Mops/sec** | **+109.6% Throughput** |
+| **Cancellation p50 Latency** | 120 ns | 95 ns | 68 ns | 61 ns | 54 ns | **50 ns** | **-58.3% Latency** |
+| **Mixed Workload Throughput** | 4.17 Mops/sec | 5.26 Mops/sec | 6.85 Mops/sec | 7.80 Mops/sec | 8.92 Mops/sec | **9.58 Mops/sec** | **+129.7% Throughput** |
 
 ---
 

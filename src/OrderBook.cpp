@@ -115,7 +115,8 @@ void OrderBook::addOrder(const Order& order)
 
         if (incoming.remainingQuantity > 0)
         {
-            auto& level = buyBook[incoming.price];
+            auto [bookIt, inserted] = buyBook.try_emplace(incoming.price);
+            auto& level = bookIt->second;
             level.push_back(incoming);
             auto it = std::prev(level.end());
             orderMap[incoming.id] = {Side::Buy, incoming.price, it};
@@ -161,7 +162,8 @@ void OrderBook::addOrder(const Order& order)
 
         if (incoming.remainingQuantity > 0)
         {
-            auto& level = sellBook[incoming.price];
+            auto [bookIt, inserted] = sellBook.try_emplace(incoming.price);
+            auto& level = bookIt->second;
             level.push_back(incoming);
             auto it = std::prev(level.end());
             orderMap[incoming.id] = {Side::Sell, incoming.price, it};
