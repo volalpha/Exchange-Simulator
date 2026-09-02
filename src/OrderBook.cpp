@@ -20,8 +20,6 @@ std::size_t OrderBook::size() const
 
 void OrderBook::print() const
 {
-    std::cout << "\n=== BUY BOOK ===\n";
-
     for(const auto& [price, level] : buyBook)
     {
         std::cout << "Price: " << price << "\n";
@@ -35,8 +33,6 @@ void OrderBook::print() const
         }
     }
 
-    std::cout << "\n=== SELL BOOK ====\n";
-
     for(const auto& [price, level] : sellBook)
     {
         std::cout << "Price: " << price << "\n";
@@ -48,9 +44,6 @@ void OrderBook::print() const
                 << " Qty: " << order.remainingQuantity
                 << "\n";
         }
-    }
-
-    std::cout << "====\n";
 }
 
 void OrderBook::addOrder(const Order& order)
@@ -75,7 +68,6 @@ void OrderBook::addOrder(const Order& order)
 
     Order incoming = order;
 
-    // ==================== BUY ORDER MATCHING & RESTING LOGIC ====================
     if (incoming.side == Side::Buy)
     {
         auto bestAsk = sellBook.begin();
@@ -83,7 +75,6 @@ void OrderBook::addOrder(const Order& order)
         while (incoming.remainingQuantity > 0 && 
                bestAsk != sellBook.end())
         {
-            // Buy price cannot meet the lowest ask
             if (incoming.price < bestAsk->first)
                 break;
 
@@ -122,7 +113,6 @@ void OrderBook::addOrder(const Order& order)
             orderMap[incoming.id] = {Side::Buy, incoming.price, it};
         }
     }
-    // ==================== SELL ORDER MATCHING & RESTING LOGIC ====================
     else
     {
         auto bestBid = buyBook.begin();
@@ -180,7 +170,6 @@ void OrderBook::processMarketOrder(const Order& order)
 
     Order incoming = order;
 
-    // --- BUY MARKET ORDER MATCHING LOGIC ---
     if (incoming.side == Side::Buy)
     {
         auto bestAsk = sellBook.begin();
@@ -214,7 +203,6 @@ void OrderBook::processMarketOrder(const Order& order)
             }
         }
     }
-    // --- SELL MARKET ORDER MATCHING LOGIC ---
     else
     {
         auto bestBid = buyBook.begin();

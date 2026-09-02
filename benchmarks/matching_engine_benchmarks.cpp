@@ -45,9 +45,7 @@ LatencyStats computeLatencyStats(std::vector<double> &latenciesNs) {
 }
 
 void printBenchmarkHeader(const std::string &title) {
-  std::cout << "\n==========================================================\n";
-  std::cout << " BENCHMARK: " << title << "\n";
-  std::cout << "==========================================================\n";
+  std::cout << "\n BENCHMARK: " << title << "\n";
 }
 
 void printResults(size_t opsCount, double totalMs,
@@ -80,9 +78,7 @@ void printResults(size_t opsCount, double totalMs,
   }
 }
 
-// ------------------------------------------------------------
-// BENCHMARK 1: Limit Order Insertion Throughput (Non-crossing)
-// ------------------------------------------------------------
+// Benchmark 1: Limit Order Insertion Throughput (Non-crossing)
 void benchLimitInsertion(size_t numOrders, size_t numPriceLevels) {
   printBenchmarkHeader("1. Limit Order Insertion (Non-Crossing)");
 
@@ -128,9 +124,7 @@ void benchLimitInsertion(size_t numOrders, size_t numPriceLevels) {
   printResults(numOrders, totalMs, &stats);
 }
 
-// ------------------------------------------------------------
-// BENCHMARK 2: Matching Throughput (Full & Partial Fills)
-// ------------------------------------------------------------
+// Benchmark 2: Matching Throughput (Full & Partial Fills)
 void benchMatchingThroughput(size_t numPairs) {
   printBenchmarkHeader("2. Matching Throughput (Continuous Matches)");
 
@@ -181,9 +175,7 @@ void benchMatchingThroughput(size_t numPairs) {
   std::cout << "  Trades Emitted: " << engine.getTrades().size() << "\n";
 }
 
-// ------------------------------------------------------------
-// BENCHMARK 3: Cancellation Throughput (O(1) Order-ID Index)
-// ------------------------------------------------------------
+// Benchmark 3: Cancellation Throughput (O(1) Order-ID Index)
 void benchCancellationThroughput(size_t numOrders) {
   printBenchmarkHeader("3. Order Cancellation Throughput");
 
@@ -233,9 +225,7 @@ void benchCancellationThroughput(size_t numOrders) {
   printResults(numOrders, totalMs, &stats);
 }
 
-// ------------------------------------------------------------
-// BENCHMARK 4: Mixed Real-World Workload Simulation
-// ------------------------------------------------------------
+// Benchmark 4: Mixed Real-World Workload Simulation
 void benchMixedWorkload(size_t numOps) {
   printBenchmarkHeader("4. Mixed Workload Simulation (60% Limit, 20% Cancel, "
                        "10% Market, 10% Modify)");
@@ -302,9 +292,7 @@ void benchMixedWorkload(size_t numOps) {
             << "\n";
 }
 
-// ------------------------------------------------------------
-// BENCHMARK 5: Price Level Scalability Test
-// ------------------------------------------------------------
+// Benchmark 5: Price Level Scalability Test
 void benchPriceLevelScalability() {
   printBenchmarkHeader("5. Price Level Scalability Test (10 to 10,000 Levels)");
 
@@ -341,9 +329,7 @@ void benchPriceLevelScalability() {
 }
 
 int main() {
-  std::cout << "==========================================================\n";
   std::cout << "      EXCHANGE SIMULATOR PERFORMANCE BENCHMARK SUITE       \n";
-  std::cout << "==========================================================\n";
 
   // Run benchmarks
   benchLimitInsertion(100000, 1000);
@@ -352,10 +338,8 @@ int main() {
   benchMixedWorkload(200000);
   benchPriceLevelScalability();
 
-  std::cout << "\n==========================================================\n";
-  std::cout << " ALL BENCHMARKS COMPLETED SUCCESSFULLY\n";
+  std::cout << "\n ALL BENCHMARKS COMPLETED SUCCESSFULLY\n";
   std::cout << " (Sink accumulator: " << g_benchmarkSink << ")\n";
-  std::cout << "==========================================================\n";
 
   return 0;
 }

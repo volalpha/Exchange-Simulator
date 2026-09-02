@@ -100,12 +100,10 @@ int main()
         book.addOrder(buy);
         book.addOrder(sell);
 
-        // Remaining BUY order should rest in this one...
+        // Remaining BUY order should rest
         assert(book.size() == 1);
 
         std::cout << "TEST 4 PASSED: Partial match\n";
-
-        book.print();
     }
 
     // TEST 5: CANCEL BUY
@@ -225,8 +223,6 @@ int main()
     assert(book.size() == 1);
 
     std::cout << "TEST 8 PASSED: FIFO at same price\n";
-
-    book.print();
 }
 
 // TEST 9: PRICE PRIORITY
@@ -241,8 +237,6 @@ int main()
 
     Order buy(3, 103, 1, Side::Buy, 103, 30);
     book.addOrder(buy);
-
-    book.print();
 
     assert(book.size() == 2);
 
@@ -261,8 +255,6 @@ int main()
     Order buy(3, 103, 1, Side::Buy, 105, 60);
     book.addOrder(buy);
 
-    book.print();
-
     assert(book.size() == 1);
 
     std::cout << "TEST 10 PASSED: Multiple price levels\n";
@@ -275,8 +267,6 @@ int main()
     book.addOrder(Order(2, 102, 1, Side::Sell, 102, 40));
 
     book.addOrder(Order(3, 103, 1, Side::Buy, 105, 50));
-
-    book.print();
 
     assert(book.size() == 1);
 
@@ -291,8 +281,6 @@ int main()
 
     book.addOrder(Order(3, 103, 1, Side::Buy, 105, 50));
 
-    book.print();
-
     assert(book.empty());
 
     std::cout << "TEST 12 PASSED: Full fill across levels\n";
@@ -305,8 +293,6 @@ int main()
     book.addOrder(Order(2, 102, 1, Side::Buy, 102, 40));
 
     book.addOrder(Order(3, 103, 1, Side::Sell, 100, 50));
-
-    book.print();
 
     assert(book.size() == 1);
 
@@ -325,8 +311,6 @@ int main()
 
     book.addOrder(Order(4, 104, 1, Side::Sell, 100, 60));
 
-    book.print();
-
     assert(book.size() == 2);
 
     std::cout << "TEST 14 PASSED: Price priority + FIFO\n";
@@ -337,8 +321,6 @@ int main()
 
     book.addOrder(Order(1, 101, 1, Side::Sell, 105, 50));
     book.addOrder(Order(2, 102, 1, Side::Buy, 100, 30));
-
-    book.print();
 
     assert(book.size() == 2);
 

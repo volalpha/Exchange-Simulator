@@ -1,5 +1,7 @@
 # Build directories
 build/
+build-asan/
+build_asan/
 bin/
 lib/
 out/
@@ -44,6 +46,10 @@ include/types
 
 # Logs
 *.log
+
+# Core dumps
+core
+core.*
 
 # Editor and OS temporary files
 *~

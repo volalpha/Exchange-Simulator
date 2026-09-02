@@ -49,9 +49,6 @@ int main()
 
     engine.processOrder(buy);
     engine.processOrder(sell);
-
-    std::cout << "\nTEST 2 RESULT:\n";
-    engine.getOrderBook().print();
     assert(engine.getOrderBook().size() == 1);
 
 
@@ -254,8 +251,6 @@ int main()
     // buy1 -> remains
     assert(engine.getOrderBook().size() == 1);
 
-    engine.getOrderBook().print();
-
     std::cout << "TEST 7 PASSED: Price priority\n";
 }
 
@@ -305,8 +300,6 @@ int main()
     //
     // Only buy2 should remain.
     assert(engine.getOrderBook().size() == 1);
-
-    engine.getOrderBook().print();
 
     // Cancel buy2.
     // If FIFO was correct, buy2 is the only remaining order for this one.
@@ -361,7 +354,6 @@ int main()
     // Final book:
     // BUY @99 -> Qty 10
     assert(engine.getOrderBook().size() == 1);
-    engine.getOrderBook().print();
     std::cout << "TEST 9 PASSED: Multiple price levels\n";
 }
 // TEST 10: Cancel resting BUY order
@@ -1080,7 +1072,7 @@ int main()
     engine.processOrder(sell2);
 
     assert(!engine.containsOrder(111));
-    assert(engine.getOrderBook().empty()); // Price level 100 fully erased !!!!!!!!
+    assert(engine.getOrderBook().empty());
 
     std::cout << "TEST 33 PASSED: Multiple orders at same price with cancellation/interleaving\n";
 }
@@ -1118,12 +1110,12 @@ int main()
     engine.cancelOrder(0);
     engine.cancelOrder(UINT64_MAX);
 
-    // Modify with invalid values..
+    // Modify with invalid values
     assert(!engine.modifyOrder(113, -50, 50));
     assert(!engine.modifyOrder(113, 100, -10));
     assert(!engine.modifyOrder(99999, 100, 50));
 
-    // Verify buy1 (113) remains completely valid and uncorrupted..........
+    // Verify buy1 (113) remains uncorrupted
     assert(engine.containsOrder(113));
     assert(engine.getOrderBook().size() == 1);
 
