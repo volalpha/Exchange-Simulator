@@ -36,7 +36,7 @@ Exchange Simulator
 
 The following benchmark metrics were measured on a Linux x86_64 system compiled with `g++ -O3 -march=native -flto -std=c++17` (`ENABLE_LOGGING` compiled out). The table details the concrete performance progression achieved across the implemented low-latency optimizations:
 
-| Workload Scenario | Baseline (STL) | Optimization #1 (`FixedBlockAlloc`) | Optimization #2 (`FlatOrderMap`) | Optimization #3 (BBO & Reserve) | Optimization #4 (Struct Packing & In-Place) | Optimization #5 (`try_emplace` Lookup) | Total Improvement |
+| Workload Scenario | Baseline (STL) | Optimization #1 (`FixedBlockAlloc`) | Optimization #2 (`FlatOrderMap`) | Optimization #3 (BBO & Reserve) | Optimization #4 (Struct Packing & In-Place) | Optimization #5 (`try_emplace`) | Total Improvement |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
 | **Limit Insertion Throughput** | 3.85 Mops/sec | 4.92 Mops/sec | 6.45 Mops/sec | 7.25 Mops/sec | 8.10 Mops/sec | **8.52 Mops/sec** | **+121.3% Throughput** |
 | **Limit Insertion Min Latency** | 110 ns | 85 ns | 60 ns | 52 ns | 45 ns | **42 ns** | **-61.8% Latency** |
@@ -67,15 +67,15 @@ The engine maintains a 100% pass rate across 52 unit test routines in three test
 | **Total** | **52 / 52 Passing** | **PASS** |
 
 ### Key Edge Cases Tested
-- Limit order crossing, price improvement, and partial/complete fills
-- Single and multi-level resting order cancellations (BUY & SELL)
-- Safe cancellation of non-existent or previously filled order IDs
-- In-place order modification preserving price level priority
-- Market orders matching across multiple price levels and empty book rejection
-- Direct unit testing of `FlatOrderMap` insertion, lookup, cancellation, tombstones, and clear
-- Deterministic trade record generation with maker/taker identification
-- Boundary input validation (zero/negative quantity and price rejection)
-- Interleaved stress sequences (add $\to$ partial fill $\to$ modify $\to$ cancel $\to$ market fill)
+1. Price-time priority / FIFO correctness, including limit-order crossing, price improvement, and partial/complete fills.
+2. Deterministic trade record generation with maker/taker identification.
+3. In-place order modification preserving price-level priority.
+4. Single and multi-level resting-order cancellations (BUY & SELL).
+5. Market orders matching across multiple price levels and empty-book rejection.
+6. Interleaved stress sequences (add → partial fill → modify → cancel → market fill).
+7. Direct unit testing of FlatOrderMap insertion, lookup, cancellation, tombstones, and clear.
+8. Boundary input validation (zero/negative quantity and price rejection).
+9. Safe cancellation of non-existent or previously filled order IDs.
 
 ---
 
@@ -228,3 +228,5 @@ For in-depth architectural and technical design details, refer to `docs/`:
 ## Scope & Non-Goals
 
 This project focuses specifically on the core, deterministic, in-memory matching engine and order book data structures. It intentionally does not implement network transport protocols (such as FIX or ITCH/OUCH), exchange gateways, kernel bypass (DPDK/Solarflare), distributed replication, or multi-asset routing.
+
+**See also:** [Chess Engine](https://github.com/volalpha/Chess-Engine)
