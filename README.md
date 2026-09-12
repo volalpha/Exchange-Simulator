@@ -1,6 +1,7 @@
 # Exchange Simulator
 
 A high-performance, deterministic C++17 limit order book and matching engine implementing strict price-time priority (FIFO), $O(1)$ order cancellation by OrderID, low-latency memory pooling, open-addressing hash indexing, and structured trade execution reporting.
+> Related project: [Chess Engine](https://github.com/volalpha/chess-engine)
 
 ```text
 Exchange Simulator
